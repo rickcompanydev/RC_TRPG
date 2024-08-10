@@ -103,9 +103,10 @@ client.login(process.env.token)
 
 // 啟動 Express 伺服器
 app.get('/', (req, res) => {
+    console.log(`Received request for ${req.url}`);
     res.send('Hello World!')
-})
+});
 
-app.listen(8080, () => {
-    console.log('伺服器已啟動，監聽端口 8080')
-})
+app.listen(8080, '0.0.0.0', () => {
+    console.log('app listening at http://0.0.0.0:8080')
+});
