@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from 'discord.js';
+import { SlashCommandBuilder, PermissionFlagsBits } from 'discord.js';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -32,7 +32,9 @@ export const data = new SlashCommandBuilder()
             .setRequired(true))
     .addStringOption(option =>
         option.setName('color')
-            .setDescription('身份組的顏色'));
+            .setDescription('身份組的顏色'))
+            .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+            
 
 // 執行 Slash 命令的處理函數
 export async function execute(interaction) {
