@@ -3,12 +3,10 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
-// 獲取當前模組的目錄
+// 定義 link.json 檔案路徑
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// 定義 link.json 檔案路徑
-const linkFilePath = path.resolve(__dirname, '../../link.json');
+const linkFilePath = path.resolve(__dirname, '../../data/link.json');
 
 // 讀取 link.json 檔案
 function readLinkFile() {
@@ -32,16 +30,14 @@ export const data = new SlashCommandBuilder()
         option.setName('role_name')
             .setDescription('身份組的名稱')
             .setRequired(true))
-    // .addStringOption(option =>
-    //     option.setName('color')
-    //         .setDescription('身份組的顏色 (16進制顏色代碼，例如 #ff0000)')
-    //         .setRequired(false));
+    .addStringOption(option =>
+        option.setName('color')
+            .setDescription('身份組的顏色'));
 
 // 執行 Slash 命令的處理函數
 export async function execute(interaction) {
     const roleName = interaction.options.getString('role_name');
-    // const color = interaction.options.getString('color') || '#000000'; // 默認顏色為黑色
-    const color = "#41bb3d"
+    const color = interaction.options.getString('color') || '"#41bb3d"';
 
     let responseMessage = '';
 
@@ -56,12 +52,18 @@ export async function execute(interaction) {
         const roleId = newRole.id;
         const RoleName = newRole.name;
         const threadId = interaction.channel.id; // 獲取線程 ID
+        const guildId = interaction.guild.id; // 獲取伺服器 ID
 
         // 讀取 link.json
         const linkData = readLinkFile();
 
+        // 如果伺服器 ID 不存在，初始化它
+        if (!linkData[guildId]) {
+            linkData[guildId] = {};
+        }
+
         // 使用 Map 來存儲角色 ID
-        const roleMap = new Map(Object.entries(linkData));
+        const roleMap = new Map(Object.entries(linkData[guildId]));
 
         // 確保每個 threadId 對應的角色 ID 是一個數組
         if (!roleMap.has(threadId)) {
@@ -70,7 +72,8 @@ export async function execute(interaction) {
         roleMap.get(threadId).push(roleId);
 
         // 將 Map 轉換為普通對象並寫回 link.json
-        writeLinkFile(Object.fromEntries(roleMap));
+        linkData[guildId] = Object.fromEntries(roleMap);
+        writeLinkFile(linkData);
 
         responseMessage += `✨ PL們！一個新的身份組 **${newRole.name}** 已經在這裡創建了！\n`;
 

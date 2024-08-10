@@ -1,6 +1,11 @@
 import { SlashCommandBuilder } from 'discord.js';
+import { fileURLToPath } from 'url';
 import fs from 'fs';
 import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const linkFilePath = path.resolve(__dirname, '../../data/link.json');
 
 // 创建 Slash 命令
 export const data = new SlashCommandBuilder()
@@ -10,16 +15,23 @@ export const data = new SlashCommandBuilder()
 // 執行 Slash 命令的處理函數
 export async function execute(interaction) {
     const threadId = interaction.channel.id; // 從交互中獲取線程 ID
-    const linkFilePath = path.resolve('link.json'); // link.json 的路徑
-
+    const guildId = interaction.guild.id; // 獲取伺服器 ID
+    
     let responseMessage = '';
 
     try {
         // 讀取 link.json 文件
         const linkData = JSON.parse(fs.readFileSync(linkFilePath, 'utf8'));
 
+        // 確認伺服器 ID 是否存在於 linkData 中
+        if (!linkData[guildId]) {
+            responseMessage = '⚔️ PL們，這個伺服器中似乎沒有找到與這個線程相關聯的身份組。';
+            await interaction.reply(responseMessage);
+            return;
+        }
+
         // 從 linkData 中獲取與線程 ID 關聯的角色 ID
-        const roleIds = linkData[threadId];
+        const roleIds = linkData[guildId][threadId];
 
         if (!roleIds || roleIds.length === 0) {
             responseMessage = '⚔️ PL們，似乎沒有找到與這個線程相關聯的身份組。';
@@ -46,7 +58,13 @@ export async function execute(interaction) {
         }
 
         // 更新 link.json，刪除與線程 ID 相關的條目
-        delete linkData[threadId];
+        delete linkData[guildId][threadId];
+
+        // 如果伺服器下沒有其他線程，則刪除伺服器的條目
+        if (Object.keys(linkData[guildId]).length === 0) {
+            delete linkData[guildId];
+        }
+
         fs.writeFileSync(linkFilePath, JSON.stringify(linkData, null, 2));
         console.log(`🔄 已成功更新 link.json，刪除與線程 ${threadId} 相關的身份組`);
 
