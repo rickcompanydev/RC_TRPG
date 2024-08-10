@@ -2,6 +2,9 @@
 import { readdirSync, statSync } from 'fs'
 import { fileURLToPath } from 'node:url'
 import path, { dirname } from 'node:path'
+import express from 'express'
+
+var app = express()
 
 // 引入 Discord.js 模組
 import { Client, Partials, Events, Collection, GatewayIntentBits } from 'discord.js'
@@ -97,3 +100,12 @@ client.once(Events.ClientReady, c => {
 
 // 登錄到 Discord
 client.login(process.env.token)
+
+// 啟動 Express 伺服器
+app.get('/', (req, res) => {
+    res.send('Hello World!')
+})
+
+app.listen(8080, () => {
+    console.log('伺服器已啟動，監聽端口 8080')
+})
