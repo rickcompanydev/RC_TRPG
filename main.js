@@ -3,6 +3,7 @@ import { readdirSync, statSync } from 'fs'
 import { fileURLToPath } from 'node:url'
 import path, { dirname } from 'node:path'
 import express from 'express'
+import { reloadScheduledAlarms } from './data/alarm.js'
 
 var app = express()
 
@@ -94,8 +95,11 @@ client.on('ready', () => {
 })
 
 // 客戶端準備好後輸出日誌
-client.once(Events.ClientReady, c => {
-    console.log(`就緒！已登入為 ${c.user.tag}`)
+client.once('ready', () => {
+    console.log('Bot is online!');
+
+    // 重新加载已保存的提醒
+    reloadScheduledAlarms(client);
 });
 
 // 登錄到 Discord
