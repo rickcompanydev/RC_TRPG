@@ -2,31 +2,31 @@ import schedule from 'node-schedule';
 import path from 'path';
 import fs from 'fs';
 
-// 导入 client 实例
+// 導入 client 實例
 import { client } from '../main.js';
 
 const alarmsFilePath = path.resolve('./data/alarm.json');
 
-// 将用户输入的时间转换为 UTC 时间
+// 將用戶輸入的時間轉換為 UTC 時間
 export function convertToUTC(year, month, day, hour, minute) {
-    // 假设输入的时间是 +8 时区，转换为 UTC
+    // 假設輸入的時間是 +8 時區，轉換為 UTC
     return new Date(Date.UTC(year, month - 1, day, hour - 8, minute));
 }
 
-// 将 BigInt 类型值转换为字符串
+// 將 BigInt 類型值轉換為字串
 function replacer(key, value) {
     if (typeof value === 'bigint') {
-        return value.toString(); // 转换为字符串
+        return value.toString(); // 轉換為字串
     }
     return value;
 }
 
-// 保存提醒任务到文件
+// 保存提醒任務到檔案
 function saveAlarmsToFile(alarms) {
     fs.writeFileSync(alarmsFilePath, JSON.stringify(alarms, replacer, 2));
 }
 
-// 从文件读取提醒任务
+// 從檔案讀取提醒任務
 function loadAlarmsFromFile() {
     if (fs.existsSync(alarmsFilePath)) {
         const rawData = fs.readFileSync(alarmsFilePath, 'utf8');
@@ -35,17 +35,17 @@ function loadAlarmsFromFile() {
     return [];
 }
 
-// 重新加载保存的调度任务
+// 重新加載保存的調度任務
 export function reloadScheduledAlarms() {
     const alarms = loadAlarmsFromFile();
 
     alarms.forEach(alarm => {
         const date = new Date(alarm.date);
-        if (date > new Date()) { // 只重新调度未来的任务
+        if (date > new Date()) { // 只重新調度未來的任務
             schedule.scheduleJob(date, async () => {
-                console.log(`Alarm triggered for ${date}`);
+                console.log(`提醒觸發於 ${date}`);
                 if (!client || !client.guilds) {
-                    console.error('Client is not ready or client.guilds is undefined');
+                    console.error('Client 尚未準備好或 client.guilds 為 undefined');
                     return;
                 }
 
@@ -57,20 +57,20 @@ export function reloadScheduledAlarms() {
                         if (role) {
                             await channel.send(`⏰ ${alarm.message} ${role}`);
                         } else {
-                            console.error(`Role with ID ${alarm.roleId} not found.`);
+                            console.error(`找不到 ID 為 ${alarm.roleId} 的角色。`);
                         }
                     } else {
-                        console.error(`Channel with ID ${alarm.channelId} not found.`);
+                        console.error(`找不到 ID 為 ${alarm.channelId} 的頻道。`);
                     }
                 } else {
-                    console.error(`Guild with ID ${alarm.guildId} not found.`);
+                    console.error(`找不到 ID 為 ${alarm.guildId} 的伺服器。`);
                 }
             });
         }
     });
 }
 
-// 设置新的定时任务
+// 設置新的定時任務
 export function setNewAlarm(alarmData) {
     const alarms = loadAlarmsFromFile();
     alarms.push(alarmData);
@@ -78,9 +78,9 @@ export function setNewAlarm(alarmData) {
 
     const date = new Date(alarmData.date);
     schedule.scheduleJob(date, async () => {
-        console.log(`Alarm triggered for ${date}`);
+        console.log(`提醒觸發於 ${date}`);
         if (!client || !client.guilds) {
-            console.error('Client is not ready or client.guilds is undefined');
+            console.error('Client 尚未準備好或 client.guilds 為 undefined');
             return;
         }
 
@@ -92,13 +92,13 @@ export function setNewAlarm(alarmData) {
                 if (roleToMention) {
                     await channel.send(`⏰ ${alarmData.message} ${roleToMention}`);
                 } else {
-                    console.error(`Role with ID ${alarmData.roleId} not found.`);
+                    console.error(`找不到 ID 為 ${alarmData.roleId} 的角色。`);
                 }
             } else {
-                console.error(`Channel with ID ${alarmData.channelId} not found.`);
+                console.error(`找不到 ID 為 ${alarmData.channelId} 的頻道。`);
             }
         } else {
-            console.error(`Guild with ID ${alarmData.guildId} not found.`);
+            console.error(`找不到 ID 為 ${alarmData.guildId} 的伺服器。`);
         }
     });
 }

@@ -1,12 +1,12 @@
 import { SlashCommandBuilder } from 'discord.js';
-import { convertToUTC, setNewAlarm } from '../../data/alarm.js'; // 确保路径正确
+import { convertToUTC, setNewAlarm } from '../../data/alarm.js'; // 確保路徑正確
 
 export const data = new SlashCommandBuilder()
     .setName('alarm')
-    .setDescription('设置一个提醒')
+    .setDescription('設置一個提醒')
     .addStringOption(option =>
         option.setName('time')
-            .setDescription('提醒时间 (格式: yyyy:mm:dd:hh:mm)')
+            .setDescription('提醒時間 (格式: yyyy:mm:dd:hh:mm)')
             .setRequired(true))
     .addRoleOption(option =>
         option.setName('role')
@@ -14,15 +14,15 @@ export const data = new SlashCommandBuilder()
             .setRequired(true))
     .addStringOption(option =>
         option.setName('message')
-            .setDescription('自定义提醒内容')
-            .setRequired(false)); // 自定义消息是可选的
+            .setDescription('自訂提醒內容')
+            .setRequired(false)); // 自訂消息是可選的
 
 export async function execute(interaction) {
     const timeInput = interaction.options.getString('time');
     const role = interaction.options.getRole('role');
-    const message = interaction.options.getString('message'); // 获取自定义消息
+    const message = interaction.options.getString('message'); // 獲取自訂消息
 
-    // 解析时间字符串并转换为 UTC
+    // 解析時間字符串並轉換為 UTC
     const [year, month, day, hour, minute] = timeInput.split(':').map(Number);
     const date = convertToUTC(year, month, day, hour, minute);
 
@@ -31,7 +31,7 @@ export async function execute(interaction) {
         return;
     }
 
-    // 检查时间是否为未来的时间
+    // 檢查時間是否為未來的時間
     const now = new Date();
     if (date <= now) {
         await interaction.reply({ content: '請設置一個未來的時間。', ephemeral: true });
@@ -43,10 +43,10 @@ export async function execute(interaction) {
         channelId: interaction.channel.id,
         roleId: role.id,
         date: date.toISOString(),
-        message: message || '提醒時間到了！', // 默认消息
+        message: message || '提醒時間到了！', // 預設消息
     };
 
     setNewAlarm(alarmData);
 
-    await interaction.reply(`提醒已設置！將於 ${date.toLocaleString('en-US', { timeZone: 'Asia/Shanghai' })} 提及 ${role.name}。`);
+    await interaction.reply(`提醒已設置！將於 ${date.toLocaleString('zh-TW', { timeZone: 'Asia/Shanghai' })} 提及 ${role.name}。`);
 }
