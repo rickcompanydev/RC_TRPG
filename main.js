@@ -43,21 +43,23 @@ const commandFolders = readdirSync(foldersPath).filter(folder => {
     return statSync(folderPath).isDirectory()
 });
 
-// 加載所有命令文件
-for (const folder of commandFolders) {
-    const commandsPath = path.join(foldersPath, folder)
-    const commandFiles = readdirSync(commandsPath).filter(file => file.endsWith('.js') && statSync(path.join(commandsPath, file)).isFile())
+// 异步函数加载所有命令文件
+async function loadCommands() {
+    for (const folder of commandFolders) {
+        const commandsPath = path.join(foldersPath, folder);
+        const commandFiles = readdirSync(commandsPath).filter(file => file.endsWith('.js') && statSync(path.join(commandsPath, file)).isFile());
 
-    // 遍歷每個命令文件
-    for (const file of commandFiles) {
-        const filePath = path.join(commandsPath, file)
-        const command = await import(filePath)
+        // 遍历每个命令文件
+        for (const file of commandFiles) {
+            const filePath = path.join(commandsPath, file);
+            const command = await import(filePath);
 
-        // 檢查命令文件是否包含必需的屬性
-        if ('data' in command && 'execute' in command) {
-            client.commands.set(command.data.name, command)
-        } else {
-            console.log(`[警告] 在 ${filePath} 中的命令缺少必要的 "data" 或 "execute" 屬性。`)
+            // 检查命令文件是否包含必需的属性
+            if ('data' in command && 'execute' in command) {
+                client.commands.set(command.data.name, command);
+            } else {
+                console.log(`[警告] 在 ${filePath} 中的命令缺少必要的 "data" 或 "execute" 属性。`);
+            }
         }
     }
 }
@@ -114,3 +116,7 @@ app.get('/', (req, res) => {
 app.listen(8080, '0.0.0.0', () => {
     console.log('app listening at http://0.0.0.0:8080')
 });
+
+loadCommands()
+
+export { client }
