@@ -53,12 +53,7 @@ export function reloadScheduledAlarms() {
                 if (guild) {
                     const channel = guild.channels.cache.get(alarm.channelId);
                     if (channel) {
-                        const role = guild.roles.cache.get(alarm.roleId);
-                        if (role) {
-                            await channel.send(`⏰ ${alarm.message} ${role}`);
-                        } else {
-                            console.error(`找不到 ID 為 ${alarm.roleId} 的角色。`);
-                        }
+                        await channel.send(`⏰ ${alarm.message} ${alarm.mentions}`);
                     } else {
                         console.error(`找不到 ID 為 ${alarm.channelId} 的頻道。`);
                     }
@@ -88,12 +83,7 @@ export function setNewAlarm(alarmData) {
         if (guild) {
             const channel = guild.channels.cache.get(alarmData.channelId);
             if (channel) {
-                const roleToMention = guild.roles.cache.get(alarmData.roleId);
-                if (roleToMention) {
-                    await channel.send(`⏰ ${alarmData.message} ${roleToMention}`);
-                } else {
-                    console.error(`找不到 ID 為 ${alarmData.roleId} 的角色。`);
-                }
+                await channel.send(`⏰ ${alarmData.message} ${alarmData.mentions}`);
             } else {
                 console.error(`找不到 ID 為 ${alarmData.channelId} 的頻道。`);
             }

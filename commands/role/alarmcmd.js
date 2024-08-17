@@ -8,9 +8,9 @@ export const data = new SlashCommandBuilder()
         option.setName('time')
             .setDescription('提醒時間 (格式: yyyy:mm:dd:hh:mm)')
             .setRequired(true))
-    .addRoleOption(option =>
-        option.setName('role')
-            .setDescription('要提醒的角色')
+    .addStringOption(option =>
+        option.setName('mentions')
+            .setDescription('要提醒的對象 (可以@多個使用者)')
             .setRequired(true))
     .addStringOption(option =>
         option.setName('message')
@@ -19,8 +19,8 @@ export const data = new SlashCommandBuilder()
 
 export async function execute(interaction) {
     const timeInput = interaction.options.getString('time');
-    const role = interaction.options.getRole('role');
-    const message = interaction.options.getString('message'); // 獲取自訂消息
+    const mentions = interaction.options.getString('mentions'); // 获取@对象
+    const message = interaction.options.getString('message'); // 获取自訂消息
 
     // 解析時間字符串並轉換為 UTC
     const [year, month, day, hour, minute] = timeInput.split(':').map(Number);
@@ -41,12 +41,12 @@ export async function execute(interaction) {
     const alarmData = {
         guildId: interaction.guild.id,
         channelId: interaction.channel.id,
-        roleId: role.id,
+        mentions: mentions, // 保存提及的對象
         date: date.toISOString(),
         message: message || '提醒時間到了！', // 預設消息
     };
 
     setNewAlarm(alarmData);
 
-    await interaction.reply(`提醒已設置！將於 ${date.toLocaleString('zh-TW', { timeZone: 'Asia/Shanghai' })} 提及 ${role.name}。`);
+    await interaction.reply(`提醒已設置！將於 ${date.toLocaleString('zh-TW', { timeZone: 'Asia/Shanghai' })} 提及 ${mentions}。`);
 }
