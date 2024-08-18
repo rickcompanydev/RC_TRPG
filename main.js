@@ -64,6 +64,8 @@ async function loadCommands() {
     }
 }
 
+loadCommands()
+
 // 處理互動事件
 client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isChatInputCommand()) return
@@ -98,13 +100,13 @@ client.on('ready', () => {
 
 // 客戶端準備好後輸出日誌
 client.once('ready', () => {
-    console.log('Bot is online!');
-
-    // 重新加载已保存的提醒
-    reloadScheduledAlarms(client);
+    console.log(`✅Ready! Signed in as ${client.user.tag}`);
 });
 
+// 重新加载已保存的提醒
+reloadScheduledAlarms(client);
 // 登錄到 Discord
+
 client.login(process.env.token)
 
 // 啟動 Express 伺服器
@@ -117,6 +119,5 @@ app.listen(8080, '0.0.0.0', () => {
     console.log('app listening at http://0.0.0.0:8080')
 });
 
-loadCommands()
 
 export { client }
